@@ -19,125 +19,6 @@ export async function createNote(req, res) {
   }
 }
 
-// export async function getUserNote(req, res) {
-//   try {
-//     const userId = req.user.userId;
-//     const { search, sort, order, category, startDate, endDate, isPublic } =
-//       req.query;
-
-//     let query = { author: userId };
-
-//     if (search) {
-//       query.$or = [
-//         { title: { $regex: search, $options: "i" } },
-//         { content: { $regex: search, $options: "i" } },
-//       ];
-//     }
-
-//     if (category) {
-//       query.category = category;
-//     }
-
-//     if (isPublic !== undefined) {
-//       query.isPublic = isPublic === "true";
-//     }
-
-//     if (startDate && endDate) {
-//       const start = new Date(startDate);
-//       const end = new Date(endDate);
-
-//       if (!isNaN(start) && !isNaN(end)) {
-//         end.setHours(23, 59, 59, 999);
-//         query.createdAt = {
-//           $gte: start,
-//           $lte: end,
-//         };
-//       }
-//     }
-
-//     let sortOptions = {};
-//     if (sort) {
-//       sortOptions[sort] = order === "desc" ? -1 : 1;
-//     } else {
-//       sortOptions["createdAt"] = -1;
-//     }
-
-//     const userNoteData = await NoteModel.find(query)
-//       .populate("author", "name email")
-//       .sort(sortOptions);
-
-//     res.status(200).json({ message: "Success", userNoteData });
-//   } catch (error) {
-//     console.error("Error fetching notes:", error);
-//     res.status(500).json({ message: "Internal server error" });
-//   }
-// }
-
-// export async function getUserNote(req, res) {
-//   try {
-//     const userId = req.user.userId;
-//     const { search, sort, order, category, startDate, endDate, isPublic } =
-//       req.query;
-
-//     // Set the query for the user's own notes
-//     let query = { author: userId };
-
-//     if (search) {
-//       query.$or = [
-//         { title: { $regex: search, $options: "i" } },
-//         { content: { $regex: search, $options: "i" } },
-//       ];
-//     }
-
-//     if (category) {
-//       query.category = category;
-//     }
-
-//     if (startDate && endDate) {
-//       const start = new Date(startDate);
-//       const end = new Date(endDate);
-
-//       if (!isNaN(start) && !isNaN(end)) {
-//         end.setHours(23, 59, 59, 999);
-//         query.createdAt = {
-//           $gte: start,
-//           $lte: end,
-//         };
-//       }
-//     }
-
-//     let sortOptions = {};
-//     if (sort) {
-//       sortOptions[sort] = order === "desc" ? -1 : 1;
-//     } else {
-//       sortOptions["createdAt"] = -1;
-//     }
-
-//     // Query for the user's own notes and public notes (if isPublic is true)
-//     let notes = await NoteModel.find(query)
-//       .populate("author", "name email")
-//       .sort(sortOptions);
-
-//     // If `isPublic` is not undefined, filter based on public visibility
-//     if (isPublic !== undefined) {
-//       notes = notes.filter((note) => note.isPublic === (isPublic === "true"));
-//     }
-
-//     // Fetch all public notes and append them to the user's notes (if they are logged in)
-//     const publicNotes = await NoteModel.find({ isPublic: true }).populate(
-//       "author",
-//       "name email"
-//     );
-
-//     // Combine the user's notes (private/public) and the public notes
-//     const combinedNotes = [...notes, ...publicNotes];
-
-//     res.status(200).json({ message: "Success", userNoteData: combinedNotes });
-//   } catch (error) {
-//     console.error("Error fetching notes:", error);
-//     res.status(500).json({ message: "Internal server error" });
-//   }
-// }
 export async function getUserNote(req, res) {
   try {
     const userId = req.user.userId;
@@ -182,12 +63,10 @@ export async function getUserNote(req, res) {
       sortOptions["createdAt"] = -1;
     }
 
-    // Fetch the user's own notes (filtered by the search term, if provided)
     let userNotes = await NoteModel.find(query)
       .populate("author", "name email")
       .sort(sortOptions);
 
-    // If `isPublic` is provided in the query, filter the public notes
     if (isPublic !== undefined) {
       userNotes = userNotes.filter(
         (note) => note.isPublic === (isPublic === "true")
@@ -225,12 +104,11 @@ export async function getPublicNote(req, res) {
     res.status(500).json({ message: "Error fetching public notes", error });
   }
 }
-// Fetch Update  Notes
 export async function updateNote(req, res) {
   try {
     const { id } = req.params;
     const note = await NoteModel.findById(id);
-
+    
     if (!note) {
       return res.status(404).json({ message: "Note not found" });
     }

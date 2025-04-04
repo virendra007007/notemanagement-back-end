@@ -15,6 +15,7 @@ const noteSchema = new Schema(
     isPublic: { type: Boolean, default: false }, 
   },
   { timestamps: true }
+
 );
 
 const NoteModel = model("Note", noteSchema);
